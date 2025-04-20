@@ -306,6 +306,8 @@ class Chat:
         log('info', f"Using Push-to-Talk: {self.config['ptt_var']}")
         log('info', f"Using Function Calling: {self.config['tools_var']}")
         log('info', f"Current model: {self.config['llm_model_name']}")
+        log('info', f"Input Device:  {self.config['input_device_name']}")
+        log('info', f"Output Device:  {self.config['output_device_name']}")
         log('info', f"Current TTS voice: {self.config['tts_voice']}")
         log('info', f"Current TTS Speed: {self.config['tts_speed']}")
         log('info', "Current backstory: " + self.backstory)
