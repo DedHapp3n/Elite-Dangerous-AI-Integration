@@ -1,5 +1,14 @@
 <!-- STATUS CONTAINER -->
 <div class="status-container">
+<div class="status-bg" aria-hidden="true">
+  <img
+    [src]="buildShipPngUrl(getShipType()) + '?v=' + getShipType()"
+    [src]="shipImgUrl"
+    [alt]="getShipType()"
+    loading="lazy"
+    decoding="async"
+    (error)="onShipImgError()" />
+</div>
 <div class="info-tab">
     <!-- Expandable panels at top -->
     <div *ngIf="showFriendsPanel" class="expandable-panel friends-panel" (click)="onBackgroundClick($event, 'friends')">

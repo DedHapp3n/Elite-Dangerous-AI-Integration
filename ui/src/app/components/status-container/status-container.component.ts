@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { MatCardModule } from "@angular/material/card";
 import { MatIconModule } from "@angular/material/icon";
@@ -16,7 +16,7 @@ import { Subscription } from "rxjs";
   templateUrl: "./status-container.component.html",
   styleUrl: "./status-container.component.css",
 })
-export class StatusContainerComponent implements OnInit, OnDestroy {
+export class StatusContainerComponent implements OnInit, OnDestroy ,OnChanges {
   // Core projections
   currentStatus: any = null;
   location: any = null;
@@ -83,10 +83,14 @@ export class StatusContainerComponent implements OnInit, OnDestroy {
   private rebuildIntervalId: any = null;
   currentTimeMs: number = Date.now();
 
-  constructor(private projectionsService: ProjectionsService) {}
+  constructor(private projectionsService: ProjectionsService,private cdr: ChangeDetectorRef) {}
+  private readonly SHIP_ASSET_DIR = 'assets/ship/ext';
+  private readonly FALLBACK_IMG = 'assets/ship/ext/unknown_ship.png';
+  
 
   ngOnInit(): void {
     // Subscribe to all available projections
+    this.updateShipImage();
     this.subscriptions.push(
       this.projectionsService.currentStatus$.subscribe(status => {
         this.currentStatus = status;
@@ -217,7 +221,7 @@ export class StatusContainerComponent implements OnInit, OnDestroy {
         this.outfitting = outfitting;
       })
     );
-
+    
     // Start 1-second interval to update countdowns
     this.rebuildIntervalId = setInterval(() => {
       this.currentTimeMs = Date.now();
@@ -232,6 +236,12 @@ export class StatusContainerComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['shipType'] || changes['shipInfo']) {
+      this.updateShipImage();   
+      this.cdr.markForCheck();  
+    }
+  }
   // Helper function for template to get object keys
   objectKeys(obj: any): string[] {
     return obj ? Object.keys(obj) : [];
@@ -933,6 +943,46 @@ export class StatusContainerComponent implements OnInit, OnDestroy {
     console.log('Weapon modules:', this.getWeaponModules().length);
     console.log('Loadout data:', this.loadout);
   }
+
+
+shipImgUrl: string = this.FALLBACK_IMG;
+private readonly SHIP_IMAGE_MAP: Record<string, string> = {
+  'diamondback': 'd_scout_expl',
+  'diamondbackxl': 'd_scout_expl',
+  'independant_trader': 'kellback',
+  'asp_scout': 'asp_scout_exp',
+  // 'Type-9 Heavy': 'type-9_heavy',
+  // 'Krait Mk II': 'krait_mk_ii',
+  // Add exceptions here only when needed
+};
+
+private slugifyShipType(raw: string): string {
+  if (!raw) return 'unknown_ship';
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9 \-]+/g, '') 
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_');
+}
+
+
+buildShipPngUrl(type?: string): string {
+  const t = type ?? this.getShipType?.() ?? 'Unknown Ship';
+  const base = this.SHIP_IMAGE_MAP[t] ?? this.slugifyShipType(t);
+  return `${this.SHIP_ASSET_DIR}/${base}.png`;
+}
+
+updateShipImage(): void {
+  this.shipImgUrl = this.buildShipPngUrl();
+}
+
+onShipImgError(ev?: Event): void {
+  const img = ev?.target as HTMLImageElement | undefined;
+  if (img && !img.src.endsWith(this.FALLBACK_IMG)) {
+    img.src = this.FALLBACK_IMG;
+  }
+}
 
   // Constants
   readonly INFORMATION_TAB = 'info';

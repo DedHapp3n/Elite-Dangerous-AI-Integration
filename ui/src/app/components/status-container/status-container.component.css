@@ -19,6 +19,33 @@
   position: relative;
 }
 
+/* Background artwork for the current ship */
+.status-bg {
+  /* keep behind everything */
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none; /* allow clicks to pass through */
+  overflow: hidden;
+  /* subtle visibility; adjust to taste */
+  opacity: 0.18;
+}
+
+.status-bg picture,
+.status-bg img {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  /* keep within intended maximum artwork size */
+  width: min(100%, 1600px);
+  height: auto;
+  max-height: 800px;
+  object-fit: contain;
+  /* slight glow to separate from background */
+  filter: drop-shadow(0 12px 24px rgba(0,0,0,0.35));
+}
+
+
 .info-tab {
   flex: 1;
   display: flex;
