@@ -324,6 +324,8 @@
                     <div class="character-subtitle">{{ getShipType() }} {{ getActiveMode() !== 'buggy' ? '(' + getShipIdent() + ')' : '' }}</div>
                 </div>
 
+
+
                 <!-- Location Info -->
                 <div class="location-nav-container-header">
                     <div class="location-info">
@@ -440,6 +442,41 @@
                     </div>
                 </div>
             </div>
+            
+
+            
+
+
+
+            <div class="ship-modules-panel">
+                <h3 class="section-header">SHIP OVERVIEW</h3>
+
+                <div class="ship-stage">
+                    <!-- Left column: utility modules (example boxes; adjust as needed) -->
+
+                    <!-- Center: ship artwork -->
+                    <figure class="ship-figure">
+                        <img
+                            [src]="shipImgSrc"
+                            [alt]="getShipType()"
+                            loading="lazy"
+                            decoding="async"
+                            (error)="onShipImgError($event)" />
+                        <figcaption class="ship-caption">{{ getShipType() }}</figcaption>
+                    </figure>
+                    
+                    
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
 
             <!-- SHIP SHEET MAIN SECTION -->
             <div class="character-sheet-body">

@@ -88,8 +88,16 @@ export class StatusContainerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Subscribe only to projections referenced in the template
     this.subscriptions.push(
-      this.projectionsService.currentStatus$.subscribe(status => {
-        this.currentStatus = status;
+      this.projectionsService.shipInfo$.subscribe(shipInfo => {
+        const prev = this.shipInfo?.Type;
+        this.shipInfo = shipInfo;
+
+        
+        if (this.shipInfo?.Type !== prev) {
+          this.updateShipImage();
+        } else if (!this.shipImgSrc) {
+          this.updateShipImage();
+        }
       }),
       
       this.projectionsService.location$.subscribe(location => {
@@ -98,6 +106,7 @@ export class StatusContainerComponent implements OnInit, OnDestroy {
       
       this.projectionsService.shipInfo$.subscribe(shipInfo => {
         this.shipInfo = shipInfo;
+        
       }),
       
       this.projectionsService.friends$.subscribe(friends => {
@@ -740,6 +749,84 @@ export class StatusContainerComponent implements OnInit, OnDestroy {
     return this.loadout?.Rebuy || 0;
   }
 
+
+
+
+
+
+
+
+  private readonly SHIP_ASSET_DIR = 'assets/ship/ext';
+  private readonly FALLBACK_IMG   = `${this.SHIP_ASSET_DIR}/unknown_ship.png`;
+
+  private readonly SHIP_IMAGE_MAP: Record<string, string> = { // adding ship only if ui dont work
+      'Fer-de-Lance': 'ferdelance',
+      'Krait Phantom': 'krait_light',
+      'Viper Mk III': 'viper_mk_iii',
+      'diamondbackxl': 'd_scout_expl',
+      'diamondback': 'd_scout_expl',
+      'asp_scout': 'asp_scout_exp',
+      'asp': 'asp_scout_exp',
+      'federation_dropship': 'federation_dropship',
+      'federation_dropship_mkii': 'federation_dropship_mkii',
+      'federation_gunship':'federation_gunship',
+      'empire_trader': 'empire_trader',
+      'empire_eagle': 'empire_eagle',
+      'empire_courier': 'empire_courier',
+      'cutter': 'cutter',
+      'typex_2':'typex_2',
+      'typex_3':'typex_3',
+      'python_nx':'python_nx',
+      'krait_light':'krait_light'
+  };
+
+
+  leftBadges: Array<{ label: string; icon?: string }> = [
+    { label: 'HULL' },        // -> assets/ship/int/hull.png
+    { label: 'FSD' },     // -> assets/ship/int/shields.png
+    { label: 'SENSOR' },        // -> assets/ship/int/fuel.png
+    { label: 'CARGO' },       // -> assets/ship/int/cargo.png
+  ];
+  shipImgSrc: string = this.FALLBACK_IMG;
+
+  
+  private slugifyShipType(raw: string): string {
+    if (!raw) return 'unknown_ship';
+    return raw.trim().toLowerCase()
+      .replace(/[^a-z0-9 \-]+/g, '')   // keep letters/numbers/space/dash
+      .replace(/\s+/g, '_')
+      .replace(/_+/g, '_');
+  }
+
+  updateShipImage(): void {
+    const type = this.getShipType();
+    const base = this.SHIP_IMAGE_MAP[type] ?? this.slugifyShipType(type);
+    // cache-bust by type so the <img> refreshes on change
+    this.shipImgSrc = `${this.SHIP_ASSET_DIR}/${base}.png?v=${encodeURIComponent(type)}`;
+    
+  }
+  onShipImgError(ev: Event): void {
+    const img = ev.target as HTMLImageElement | null;
+    if (img && !img.src.includes('/unknown_ship.png')) {
+      img.src = this.FALLBACK_IMG + `?v=${Date.now()}`;
+      
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   getCurrentBalance(): number {
     return this.currentStatus?.Balance || 0;
   }
